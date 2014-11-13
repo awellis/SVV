@@ -15,29 +15,27 @@ import os
 4) given the estimated SVV, use this as midpoint when creating line orientations
 """
 
-# general variables
-test_mode = True
-oculus_frame_rate = 60  # TODO: is this correct?
-
 # experiment parameters
 valid_responses = ['f', 'j', 'escape']
 audio_dir = 'audio'
 RANGE = 3  # test orientations lie in the range [est-RANGE, est+RANGE]
 # number of test orientations around estimate
 N_ORI = 9
-N_REPS = 2
-TIME_LIMIT = 180
+N_REPS = 10
 ITI_DURATION = 60
+LINE_DURATION = 30
 
 # stimulus parameters
 XPOS = 500
-OPACITY = 0.3
+OPACITY = 0.15
 FIX_SIZE = [20, 20]
-LINE_SIZE = [30, 800]
+LINE_SIZE = [15, 300]
+NOISE_SIZE = [300, 300]
 blue = [-1, -1, 1]
 red = [1, -1, -1]
 yellow = [1, 1, -1]
 green = [-1, 1, -1]
+orange = [1, 0, -1]
 
 # GUI dialogue
 exp_name = 'svv'
@@ -46,13 +44,13 @@ V = {'participant': 'AE',
      'session': '01',
      'age': '99',
      'gender': ['male', 'female'],
-     'xpos': 500,
+     'xpos': 480,
      'tilt_position': ['0', '4', '6', '16'],
      'side': ['left', 'right'],
      'belief': ['upright', 'tilted'],
      'task': ['ego', 'gravity'],
      'estimation_method': ['adjustment', 'staircase'],
-     'display': ['oculus', 'laptop']}
+     'display': ['laptop', 'oculus']}
 
 
 dlg = gui.DlgFromDict(dictionary=V, title=exp_name)
@@ -62,8 +60,6 @@ if not dlg.OK:
 
 V['date'] = data.getDateStr()
 V['exp_name'] = exp_name
-
-# print(V)
 
 """
 Setup output files (CSV and log files)
@@ -77,8 +73,8 @@ filename = 'data' + os.sep + '{0:s}_{1:s}_{2:s}_{3:s}_{4:s}_{5:s}'.format(
     V['date'])
 
 
-logFile = logging.LogFile(filename+'.log', level=logging.EXP)
-logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
+# logFile = logging.LogFile(filename+'.log', level=logging.EXP)
+# logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
 
 
 """
@@ -93,10 +89,11 @@ experiment = data.ExperimentHandler(name=exp_name,
                                     saveWideText=True,
                                     dataFileName=filename)
 
-if test_mode:
-    full_screen = False
-else:
+
+if V['display'] == 'oculus':
     full_screen = True
+else:
+    full_screen = False
 
 win = visual.Window(size=(1200, 800), fullscr=full_screen,
                     units='pix', screen=0,
@@ -110,14 +107,17 @@ if V['frame_rate'] is not None:
 else:
     frame_dur = 1.0/60.0
 
-
+if V['display'] == 'oculus':
+    scaling_factor = round(V['frame_rate'])/60
+    ITI_DURATION = 60*scaling_factor
+    LINE_DURATION = 30*scaling_factor
+    print('Frame rate: {0}'.format(V['frame_rate']))
 
 """
 functions
 """
 
 def create_stimuli(win, xpos):
-    # from psychopy import visual, core, data, event, logging, sound, gui
     clock = core.Clock()
     voice = sound.Sound('A', secs=3)
 
@@ -181,11 +181,42 @@ def create_stimuli(win, xpos):
                                     interpolate=True,
                                     depth=-1.0)
 
-    return(clock, voice, fixation_left, fixation_right, line_left, line_right)
+    noise_left = visual.GratingStim(win=win,
+                               name='noise_left',
+                               tex=np.random.random((512, 512))*2-1,
+                               mask='gauss',
+                               ori=0,
+                               pos=[-xpos, 0],
+                               size=NOISE_SIZE,
+                               sf=None,
+                               phase=0.0,
+                               color=[1,1,1],
+                               colorSpace='rgb',
+                               opacity=0.6,
+                               texRes=512,
+                               interpolate=True,
+                               depth=-1.0)
+
+    noise_right = visual.GratingStim(win=win,
+                               name='noise_right',
+                               tex=np.random.random((512, 512))*2-1,
+                               mask='gauss',
+                               ori=0,
+                               pos=[xpos, 0],
+                               size=NOISE_SIZE,
+                               sf=None,
+                               phase=0.0,
+                               color=[1,1,1],
+                               colorSpace='rgb',
+                               opacity=0.6,
+                               texRes=512,
+                               interpolate=True,
+                               depth=-1.0)
+
+    return(clock, voice, fixation_left, fixation_right, line_left, line_right, noise_left, noise_right)
 
 
 def draw_fixation(color):
-    # TODO: fixations arg
     while 'space' not in event.getKeys():
         [s.setFillColor(color) for s in fixations]
         [s.draw() for s in fixations]
@@ -205,11 +236,13 @@ def draw_lines(lines, trials):
 
         event.clearEvents()
         clock.reset()
+        # win.callOnFlip(clock.reset)
+
         no_response = True
         while no_response:
             frame_n += 1
             if frame_n >= 0:
-                if frame_n < 30:
+                if frame_n < LINE_DURATION:
                     [line.draw() for line in lines]
 
             if frame_n >= 0:
@@ -284,16 +317,15 @@ def ask_calibrate():
     return calibrate
 
 
-
 """
 create stimuli
 """""
-clock, voice, fixation_left, fixation_right, line_left, line_right = \
-    create_stimuli(
-    win=win, xpos=XPOS)
+clock, voice, fixation_left, fixation_right, line_left, line_right, noise_left, noise_right = \
+    create_stimuli(win=win, xpos=XPOS)
 
 fixations = [fixation_left, fixation_right]
 lines = [line_left, line_right]
+noise = [noise_left, noise_right]
 left_stims = [fixation_left, line_left]
 right_stims = [fixation_right, line_right]
 
@@ -305,25 +337,26 @@ right_stims = [fixation_right, line_right]
 calibrate = ask_calibrate()
 
 if calibrate:
-    # TODO: calibrate
-    print('Calibration: ', calibrate)
+    print('Calibration: {0}'.format(calibrate))
     xpos = V['xpos']
 
+    [s.setFillColor(orange) for s in fixations]
     done = False
-    # frame_n = -1
     while not done:
-        # frame_n += 1
-        line_left.setPos([-xpos, 0])
-        line_right.setPos([xpos, 0])
-        [line.draw() for line in lines]
+#        line_left.setPos([-xpos, 0])
+#        line_right.setPos([xpos, 0])
+#        [line.draw() for line in lines]
+        fixation_left.setPos([-xpos, 0])
+        fixation_right.setPos([xpos, 0])
+        [s.draw() for s in fixations]
 
         if event.getKeys('f'):
             xpos -= 1
-            print(xpos)
+            print('X Position: {0}'.format(xpos))
 
         elif event.getKeys('j'):
             xpos += 1
-            print(xpos)
+            print('X Position: {0}'.format(xpos))
 
         if event.getKeys('escape'):
             core.quit()
@@ -331,21 +364,16 @@ if calibrate:
         if event.getKeys('space'):
             done = True
         win.flip()
+
+    V['xpos'] = xpos
 else:
     xpos = V['xpos']
 
 [s.setPos([-xpos, 0]) for s in left_stims]
 [s.setPos([xpos, 0]) for s in right_stims]
 
-V['xpos'] = xpos
-
-# print(xpos)
-# print(V['xpos'])
 
 core.wait(1)
-
-
-
 
 """
 INSTRUCTIONS
@@ -356,8 +384,6 @@ draw_fixation(color=green)
 
 core.wait(0.5)
 
-
-
 """
 2) obtain rough SVV estimate
     a) adjustment
@@ -365,14 +391,14 @@ core.wait(0.5)
 provides estimated SVV (default 0 deg)
 """
 
-
+tilt = float(V['tilt_position'])
 if V['side'] == 'left':
-    side = -1
+    ori = round(np.random.uniform(-tilt, 6))
 elif V['side'] == 'right':
-    side = 1
+    ori = round(np.random.uniform(-6, tilt))
 
-tilt = side * float(V['tilt_position'])
-ori = round(np.random.uniform(tilt-2, tilt+2), 2)
+#tilt = side * float(V['tilt_position'])
+#ori = round(np.random.uniform(tilt-2, tilt+2), 2)
 
 
 if V['estimation_method'] == 'adjustment':
@@ -380,14 +406,13 @@ if V['estimation_method'] == 'adjustment':
     while not done:
         [line.setOri(ori) for line in lines]
         [line.draw() for line in lines]
-        
+
         if event.getKeys('f'):
             ori -= 1
-            print(ori)
-
+            print('SVV: {svv}'.format(svv=ori))
         elif event.getKeys('j'):
             ori += 1
-            print(ori)
+            print('SVV: {svv}'.format(svv=ori))
 
         if event.getKeys('escape'):
             core.quit()
@@ -398,8 +423,6 @@ if V['estimation_method'] == 'adjustment':
 
     V['SVV'] = ori
 
-
-
 elif V['estimation_method'] == 'staircase':
     # do some other stuff...
     V['SVV'] = 0
@@ -408,10 +431,22 @@ elif V['estimation_method'] == 'staircase':
 # this is the rough estimate of the SVV
 svv = V['SVV']
 
-
-draw_fixation(color=blue)
-
 core.wait(0.5)
+
+
+# draw some noise to get rid of adjuste line
+frame_n = -1
+noise_left.setPos([-xpos, 0])
+noise_right.setPos([xpos, 0])
+
+while frame_n < ITI_DURATION:
+    frame_n += 1
+    if frame_n%2 == 0:
+        noise_texture = np.random.random((512, 512))*2-1
+        [i.setTex(noise_texture) for i in noise]
+    [i.draw() for i in noise]
+    win.flip()
+
 
 
 
@@ -435,9 +470,9 @@ start trial loop
 """
 
 # initial interval
-frameN = 0
-while frameN < 60:
-    frameN += 1
+frame_n = 0
+while frame_n < ITI_DURATION:
+    frame_n += 1
     win.flip()
 
 
