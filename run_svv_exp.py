@@ -7,6 +7,7 @@ import pyglet
 pyglet.options['shadow_window'] = False
 import numpy as np
 import os
+from sys import platform as _platform
 
 """
 1) calibrate (yes/no)
@@ -15,13 +16,40 @@ import os
 4) given the estimated SVV, use this as midpoint when creating line orientations
 """
 
+# GUI dialogue
+exp_name = 'svv'
+
+V = {'participant': 'AE',
+     'session': '01',
+     'age': '99',
+     'gender': ['male', 'female'],
+     'xpos': 480,
+     'tilt_position': ['0', '4', '6', '16', '90'],
+     'reps': [30, 20],
+     'side': ['left', 'right'],
+     'belief': ['upright', 'tilted'],
+     'task': ['gravity', 'ego'],
+     'estimation_method': ['adjustment'],
+     # 'estimation_method': ['adjustment', 'staircase'],
+     'display': ['oculus', 'laptop'],
+     'Moog': ['False', 'True']}
+
+
+dlg = gui.DlgFromDict(dictionary=V, title=exp_name)
+
+if not dlg.OK:
+    core.quit()
+
+V['date'] = data.getDateStr()
+V['exp_name'] = exp_name
 # experiment parameters
 valid_responses = ['f', 'j', 'escape']
 audio_dir = 'audio'
 RANGE = 3  # test orientations lie in the range [svv-RANGE, svv+RANGE]
 # number of test orientations around estimate
-N_ORI = 9
-N_REPS = 30
+N_ORI = 7
+N_REPS = V['reps']
+
 ITI_DURATION = 60
 LINE_DURATION = 30
 
@@ -36,31 +64,8 @@ red = [1, -1, -1]
 yellow = [1, 1, -1]
 green = [-1, 1, -1]
 orange = [1, 0, -1]
+black = [-1, -1, -1]
 
-# GUI dialogue
-exp_name = 'svv'
-
-V = {'participant': 'AE',
-     'session': '01',
-     'age': '99',
-     'gender': ['male', 'female'],
-     'xpos': 480,
-     'tilt_position': ['0', '4', '6', '16', '90'],
-     'side': ['left', 'right'],
-     'belief': ['upright', 'tilted'],
-     'task': ['gravity', 'ego'],
-     'estimation_method': ['adjustment'],
-     # 'estimation_method': ['adjustment', 'staircase'],
-     'display': ['laptop', 'oculus']}
-
-
-dlg = gui.DlgFromDict(dictionary=V, title=exp_name)
-
-if not dlg.OK:
-    core.quit()
-
-V['date'] = data.getDateStr()
-V['exp_name'] = exp_name
 
 """
 Setup output files (CSV and log files)
@@ -93,7 +98,10 @@ experiment = data.ExperimentHandler(name=exp_name,
 
 if V['display'] == 'oculus':
     full_screen = True
-    screen_n = 1
+    if _platform == "win32":
+        screen_n = 1
+    else:
+        screen_n = 0
 else:
     full_screen = False
     screen_n = 0
@@ -328,6 +336,14 @@ def ask_calibrate():
     core.wait(0.5)
     return calibrate
 
+def wait_quit():
+    while 'q' not in event.getKeys():
+        win.flip()
+        if event.getKeys(["escape"]):
+            core.quit()
+    event.clearEvents()
+    win.flip()
+    core.wait(0.5)
 
 def deg2rad(deg):
     import math
@@ -422,6 +438,10 @@ INSTRUCTIONS
 """
 draw_fixation(color=green)
 play_voice(V, voice, dur=4)
+# draw_fixation(blue)
+if True:
+    core.wait(45)
+
 draw_fixation(color=green)
 
 core.wait(0.5)
@@ -545,8 +565,9 @@ draw_lines(lines, trials)
 
 # draw yellow circle to indicate end of trials
 draw_fixation(color=yellow)
+draw_fixation(color=black)
 
-
+wait_quit()
 
 """
 end experiment
