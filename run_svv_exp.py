@@ -48,8 +48,9 @@ V = {'participant': 'AE',
      'tilt_position': ['0', '4', '6', '16'],
      'side': ['left', 'right'],
      'belief': ['upright', 'tilted'],
-     'task': ['ego', 'gravity'],
-     'estimation_method': ['adjustment', 'staircase'],
+     'task': ['gravity', 'ego'],
+     'estimation_method': ['adjustment'],
+     # 'estimation_method': ['adjustment', 'staircase'],
      'display': ['laptop', 'oculus']}
 
 
@@ -92,11 +93,13 @@ experiment = data.ExperimentHandler(name=exp_name,
 
 if V['display'] == 'oculus':
     full_screen = True
+    screen_n = 1
 else:
     full_screen = False
+    screen_n = 0
 
 win = visual.Window(size=(1200, 800), fullscr=full_screen,
-                    units='pix', screen=0,
+                    units='pix', screen=screen_n,
                     allowGUI=False, allowStencil=False,
                     monitor='testMonitor', color=[-1, -1, -1], colorSpace='rgb',
                     blendMode='avg', useFBO=True)
@@ -111,11 +114,15 @@ if V['display'] == 'oculus':
     scaling_factor = round(V['frame_rate'])/60
     ITI_DURATION = 60*scaling_factor
     LINE_DURATION = 30*scaling_factor
-    print('Frame rate: {0}'.format(V['frame_rate']))
+    print('Frame rate: {frame_rate}'.format(frame_rate=V['frame_rate']))
+    print('Scaling factor: {scaling_factor}'.format(scaling_factor=scaling_factor))
+
 
 """
-functions
+define functions
 """
+def make_noise(size=512):
+    return np.random.random((size, size))*2-1
 
 def create_stimuli(win, xpos):
     clock = core.Clock()
@@ -183,7 +190,8 @@ def create_stimuli(win, xpos):
 
     noise_left = visual.GratingStim(win=win,
                                name='noise_left',
-                               tex=np.random.random((512, 512))*2-1,
+                               # tex=np.random.random((512, 512))*2-1,
+                               tex=make_noise(),
                                mask='gauss',
                                ori=0,
                                pos=[-xpos, 0],
@@ -199,7 +207,8 @@ def create_stimuli(win, xpos):
 
     noise_right = visual.GratingStim(win=win,
                                name='noise_right',
-                               tex=np.random.random((512, 512))*2-1,
+                               # tex=np.random.random((512, 512))*2-1,
+                               tex=make_noise(),
                                mask='gauss',
                                ori=0,
                                pos=[xpos, 0],
@@ -317,9 +326,11 @@ def ask_calibrate():
     return calibrate
 
 
+
 """
 create stimuli
 """""
+
 clock, voice, fixation_left, fixation_right, line_left, line_right, noise_left, noise_right = \
     create_stimuli(win=win, xpos=XPOS)
 
@@ -387,18 +398,18 @@ core.wait(0.5)
 """
 2) obtain rough SVV estimate
     a) adjustment
-    b) staircase
+    b) staircase (not yet implemented)
 provides estimated SVV (default 0 deg)
 """
 
 tilt = float(V['tilt_position'])
 if V['side'] == 'left':
-    ori = round(np.random.uniform(-tilt, 6))
+    ori = round(np.random.uniform(-tilt-2, tilt))
 elif V['side'] == 'right':
-    ori = round(np.random.uniform(-6, tilt))
+    ori = round(np.random.uniform(-tilt, tilt+2))
 
-#tilt = side * float(V['tilt_position'])
-#ori = round(np.random.uniform(tilt-2, tilt+2), 2)
+# tilt = side * float(V['tilt_position'])
+# ori = round(np.random.uniform(tilt-2, tilt+2), 2)
 
 
 if V['estimation_method'] == 'adjustment':
@@ -421,10 +432,12 @@ if V['estimation_method'] == 'adjustment':
             done = True
         win.flip()
 
+    # TODO: transform ori so that it always lies in interval [-90, 90]
+
     V['SVV'] = ori
 
 elif V['estimation_method'] == 'staircase':
-    # do some other stuff...
+    # TODO: not implemented yet...
     V['SVV'] = 0
 
 
@@ -434,12 +447,29 @@ svv = V['SVV']
 core.wait(0.5)
 
 
-# draw some noise to get rid of adjuste line
+# spin line and then draw some noise to get rid of adjust line
+frame_n = -1
+degrees = 360/45
+coin_flip = np.random.binomial(n=1, p=0.5, size=1)
+
+if coin_flip:
+    op = '+'
+else:
+    op = '-'
+
+while frame_n < 5*ITI_DURATION:
+    frame_n += 1
+    if frame_n%1 == 0:
+        ori = ori
+        [line.setOri(degrees, op) for line in lines]
+        [line.draw() for line in lines]
+        win.flip()
+
 frame_n = -1
 noise_left.setPos([-xpos, 0])
 noise_right.setPos([xpos, 0])
 
-while frame_n < ITI_DURATION:
+while frame_n < 5*ITI_DURATION:
     frame_n += 1
     if frame_n%2 == 0:
         noise_texture = np.random.random((512, 512))*2-1

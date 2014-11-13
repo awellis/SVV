@@ -4,3 +4,9 @@ svv_builder.py
 *.psydat
 
 *.csv
+
+*.sublime-project
+
+*.do
+
+*.sublime-workspace
