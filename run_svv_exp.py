@@ -2,7 +2,7 @@
 # @author: Andrew Ellis <a.w.ellis@gmail.com>
 
 from __future__ import division
-from psychopy import visual, core, data, event, logging, sound, gui
+from psychopy import core, data, event, logging, sound, gui
 import pyglet
 pyglet.options['shadow_window'] = False
 import numpy as np
@@ -42,6 +42,15 @@ if not dlg.OK:
 
 V['date'] = data.getDateStr()
 V['exp_name'] = exp_name
+
+"""
+workaround for dropdown selection error:
+https://groups.google.com/forum/#!topic/psychopy-users/jV8JBSwIUWk
+"""
+
+from psychopy import visual
+
+
 # experiment parameters
 valid_responses = ['f', 'j', 'escape']
 audio_dir = 'audio'
@@ -439,7 +448,8 @@ INSTRUCTIONS
 draw_fixation(color=green)
 play_voice(V, voice, dur=4)
 # draw_fixation(blue)
-if True:
+
+if V['Moog']:
     core.wait(45)
 
 draw_fixation(color=green)
