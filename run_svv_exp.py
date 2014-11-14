@@ -370,7 +370,7 @@ def rad2deg(rad):
 def transform(ori):
     if ori < 0:
         sign = -1
-    elif ori > 0:
+    elif ori >= 0:
         sign = 1
     ori = ori % (sign * 360)
     return(ori)
