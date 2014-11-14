@@ -32,7 +32,7 @@ V = {'participant': 'AE',
      'estimation_method': ['adjustment'],
      # 'estimation_method': ['adjustment', 'staircase'],
      'display': ['oculus', 'laptop'],
-     'Moog': [False, True],
+     'Moog': ['yes', 'no'],
      'n_adjust': [1, 2, 4]}
 
 
@@ -450,12 +450,16 @@ draw_fixation(color=green)
 play_voice(V, voice, dur=4)
 # draw_fixation(blue)
 
-if V['Moog']:
+print V['Moog']
+
+if V['Moog'] == 'yes':
     core.wait(45)
+else:
+    core.wait(0.5)
 
 draw_fixation(color=green)
 
-core.wait(0.5)
+
 
 """
 2) obtain rough SVV estimate
