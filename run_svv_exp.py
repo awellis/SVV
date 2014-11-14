@@ -370,7 +370,7 @@ def rad2deg(rad):
 def transform(ori):
     if ori < 0:
         sign = -1
-    elif ori > 0:
+    elif ori >= 0:
         sign = 1
     ori = ori % (sign * 360)
     return(ori)
@@ -379,7 +379,7 @@ def transform(ori):
 def flip_coin(boolean=True):
     import numpy as np
     if boolean:
-        return(np.random.choice(['True', 'False']))
+        return(np.random.choice([True, False]))
     else:
         return(np.random.binomial(n=1, p=0.5, size=1))
 
