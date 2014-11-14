@@ -32,7 +32,7 @@ V = {'participant': 'AE',
      'estimation_method': ['adjustment'],
      # 'estimation_method': ['adjustment', 'staircase'],
      'display': ['oculus', 'laptop'],
-     'Moog': ['False', 'True'],
+     'Moog': [False, True],
      'n_adjust': [1, 2, 4]}
 
 
