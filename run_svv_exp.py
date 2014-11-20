@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-# @author: Andrew Ellis <a.w.ellis@gmail.com>
+# author: Andrew Ellis <a.w.ellis@gmail.com>
+# date: 16/11/2014
 
 from __future__ import division
-from psychopy import core, data, event, logging, sound, gui
+from psychopy import core, data, event, sound, gui
 import pyglet
 pyglet.options['shadow_window'] = False
 import numpy as np
 import os
 from sys import platform as _platform
-
 """
 1) calibrate (yes/no)
 2) once calibrated, we are in a given tilt position
@@ -24,16 +24,17 @@ V = {'participant': 'AE',
      'age': '99',
      'gender': ['male', 'female'],
      'xpos': 480,
-     'tilt_position': ['0', '4', '6', '16', '90'],
-     'reps': [30, 20],
+     'tilt_position': ['0', '6', '16', '90'],
+     'reps': [30, 20, 2],
      'side': ['left', 'right'],
+     'adaptation': ['yes', 'no'],
      'belief': ['upright', 'tilted'],
      'task': ['gravity', 'ego'],
      'estimation_method': ['adjustment'],
      # 'estimation_method': ['adjustment', 'staircase'],
      'display': ['oculus', 'laptop'],
      'Moog': ['yes', 'no'],
-     'n_adjust': [1, 2, 4]}
+     'n_adjust': 1}
 
 
 dlg = gui.DlgFromDict(dictionary=V, title=exp_name)
@@ -65,16 +66,24 @@ LINE_DURATION = 30
 
 # stimulus parameters
 XPOS = 500
-OPACITY = 0.15
+
+if V['display'] == "oculus":
+    OPACITY = 0.1
+else:
+    OPACITY = 0.5
+
+print("Line opacity: {0}". format(OPACITY))
+
 FIX_SIZE = [20, 20]
-LINE_SIZE = [15, 300]
+LINE_SIZE = [15, 250]
 NOISE_SIZE = [300, 300]
-blue = [-1, -1, 1]
-red = [1, -1, -1]
-yellow = [1, 1, -1]
-green = [-1, 1, -1]
-orange = [1, 0, -1]
-black = [-1, -1, -1]
+
+COLOR = {"blue": [-1, -1, 1],
+            "red": [1, -1, -1],
+            "yellow": [1, 1, -1],
+            "green": [-1, 1, -1],
+            "orange": [1, 0, -1],
+            "black": [-1, -1, -1]}
 
 
 """
@@ -243,9 +252,17 @@ def create_stimuli(win, xpos):
     return(clock, voice, fixation_left, fixation_right, line_left, line_right, noise_left, noise_right)
 
 
+def print_message(what, message):
+    print('{what}: {message}'.format(what=what, message=message))
+
+
 def draw_fixation(color):
+    """args: color should be a string
+    """
+    print_message("Color", color)
+    print("Press 'space' to continue")
     while 'space' not in event.getKeys():
-        [s.setFillColor(color) for s in fixations]
+        [s.setFillColor(COLOR[color]) for s in fixations]
         [s.draw() for s in fixations]
         win.flip()
         if event.getKeys(["escape"]):
@@ -256,6 +273,7 @@ def draw_fixation(color):
 
 
 def draw_lines(lines, trials):
+    print("Starting 2AFC task now")
     for trial in trials:
         t = 0
         frame_n = 0
@@ -304,6 +322,8 @@ def play_voice(V, voice, dur=4):
     # TODO: check logic here...
     if V['belief'] == 'upright':
         message = os.path.join(audio_dir, 'aufrecht.wav')
+        print("Message: aufrecht")
+
     elif V['belief'] == 'tilted':
         if V['side'] == 'left':
             side = -1
@@ -312,24 +332,28 @@ def play_voice(V, voice, dur=4):
         this_tilt_pos = side * float(V['tilt_position'])
         if this_tilt_pos > 6:
             message = os.path.join(audio_dir, 'rechts_stark.wav')
+            print("Message: rechts - stark geneigt")
         elif (this_tilt_pos > 0) or (this_tilt_pos == 0 and V['side'] == 'left'):
             message = os.path.join(audio_dir, 'rechts_leicht.wav')
+            print("Message: rechts - leicht geneigt")
         elif this_tilt_pos < -6:
             message = os.path.join(audio_dir, 'links_stark.wav')
+            print("Message: links - stark geneigt")
         elif (this_tilt_pos < 0) or (this_tilt_pos == 0 and V['side'] == 'right'):
             message = os.path.join(audio_dir, 'links_leicht.wav')
+            print("Message: links - leicht geneigt")
 
     voice.setSound(message)
     voice.play()
     win.flip()
-
     core.wait(dur)
 
 
 def ask_calibrate():
     done = False
+    print("Press 'space' to continue or 'c' for calibration")
     while not done:
-        [s.setFillColor(red) for s in fixations]
+        [s.setFillColor(COLOR['red']) for s in fixations]
         [s.draw() for s in fixations]
         win.flip()
         if event.getKeys(["escape"]):
@@ -347,10 +371,15 @@ def ask_calibrate():
     return calibrate
 
 def wait_quit():
-    while 'q' not in event.getKeys():
+    print("Press 'q' to end experiment")
+    done = False
+    while not done:
+        [s.setFillColor(COLOR['black']) for s in fixations]
+        [s.draw() for s in fixations]
         win.flip()
-        if event.getKeys(["escape"]):
-            core.quit()
+        if event.getKeys(["q"]):
+            done = True
+            # core.quit()
     event.clearEvents()
     win.flip()
     core.wait(0.5)
@@ -408,12 +437,10 @@ if calibrate:
     print('Calibration: {0}'.format(calibrate))
     xpos = V['xpos']
 
-    [s.setFillColor(orange) for s in fixations]
+    [s.setFillColor(COLOR['orange']) for s in fixations]
     done = False
+
     while not done:
-#        line_left.setPos([-xpos, 0])
-#        line_right.setPos([xpos, 0])
-#        [line.draw() for line in lines]
         fixation_left.setPos([-xpos, 0])
         fixation_right.setPos([xpos, 0])
         [s.draw() for s in fixations]
@@ -446,18 +473,32 @@ core.wait(1)
 """
 INSTRUCTIONS
 """
-draw_fixation(color=green)
-play_voice(V, voice, dur=4)
-# draw_fixation(blue)
+# print("Press 'space' to continue")
+draw_fixation(color='green')
 
-print V['Moog']
+print("Playing instructions:")
+play_voice(V, voice, dur=4)
 
 if V['Moog'] == 'yes':
-    core.wait(45)
+    print("Running experiment on MOOG")
+else:
+    print("Running experiment on laptop")
+
+
+if V['Moog'] == 'yes':
+    print("Waiting for 15 seconds...")
+    countdown = 15*ITI_DURATION
+    while countdown >= 0:
+        if countdown%10 == 0:
+            print("Countdown: {0}".format(countdown))
+        win.flip()
+        countdown -= 1
 else:
     core.wait(0.5)
 
-draw_fixation(color=green)
+
+print("Waiting for adjustment task to start")
+draw_fixation(color='green')
 
 
 
@@ -479,6 +520,7 @@ elif V['side'] == 'right':
 
 
 if V['estimation_method'] == 'adjustment':
+    print("Adjustment task started...")
     done = False
     while not done:
         [line.setOri(ori) for line in lines]
@@ -486,10 +528,10 @@ if V['estimation_method'] == 'adjustment':
 
         if event.getKeys('f'):
             ori -= 1
-            print('SVV: {svv}'.format(svv=ori))
+            print('current SVV: {svv}'.format(svv=ori))
         elif event.getKeys('j'):
             ori += 1
-            print('SVV: {svv}'.format(svv=ori))
+            print('current SVV: {svv}'.format(svv=ori))
 
         if event.getKeys('escape'):
             core.quit()
@@ -510,6 +552,7 @@ elif V['estimation_method'] == 'staircase':
 
 # this is the rough estimate of the SVV
 svv = V['SVV']
+print("Final SVV estimate: {0}".format(svv))
 
 core.wait(0.5)
 
@@ -518,6 +561,7 @@ core.wait(0.5)
 frame_n = -1
 degrees = 360/30
 
+print("Rotate line and draw some noise")
 
 if flip_coin():
     op = '+'
@@ -553,7 +597,10 @@ while frame_n < 5*ITI_DURATION:
 """
 
 # GO signal for line orientation discrimination trials
-draw_fixation(color=green)
+print("Waiting for 2AFC task to start\n")
+draw_fixation(color='green')
+
+
 sequence = list(np.linspace(start=svv-RANGE, stop=svv+RANGE, num=N_ORI))
 
 conditions = {'orientation': sequence}
@@ -579,8 +626,8 @@ draw_lines(lines, trials)
 
 
 # draw yellow circle to indicate end of trials
-draw_fixation(color=yellow)
-draw_fixation(color=black)
+draw_fixation(color='yellow')
+print("2AFC task done")
 
 wait_quit()
 
