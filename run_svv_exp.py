@@ -19,14 +19,17 @@ from sys import platform as _platform
 # GUI dialogue
 exp_name = 'svv'
 
-V = {'participant': 'AE',
+V = {'participant_name': 'AE',
+     'participant_number': 01,
      'session': '01',
      'age': '99',
+     'hand': ['right', 'left'],
      'gender': ['male', 'female'],
      'xpos': 480,
      'tilt_position': ['0', '6', '16', '90'],
      'reps': [30, 20, 2],
      'side': ['left', 'right'],
+     'belief_side': ['left', 'right'],
      'adaptation': ['yes', 'no'],
      'belief': ['upright', 'tilted'],
      'task': ['gravity', 'ego'],
@@ -37,7 +40,12 @@ V = {'participant': 'AE',
      'n_adjust': 1}
 
 
-dlg = gui.DlgFromDict(dictionary=V, title=exp_name)
+dlg = gui.DlgFromDict(dictionary=V, title=exp_name,
+                      order=['participant_number', 'participant_name', 'age',
+                      'hand', 'gender', 'xpos', 'session',
+                      'side', 'adaptation', 'belief_side', 'tilt_position',
+                      'belief', 'task', 'reps', 'Moog', 'display', 'n_adjust',
+                      'estimation_method'])
 
 if not dlg.OK:
     core.quit()
@@ -92,8 +100,8 @@ Setup output files (CSV and log files)
 if not os.path.isdir('data'):
     os.makedirs('data')
 
-filename = 'data' + os.sep + '{0:s}_{1:s}_{2:s}_{3:s}_{4:s}_{5:s}'.format(
-    V['participant'], V['task'],
+filename = 'data' + os.sep + '{0:s}_{1:s}_{2:s}_{3:s}_{4:s}_{5:s}_{6:s}'.format(
+    str(V['participant_number']), V['participant_name'], V['task'],
     V['tilt_position'], V['belief'], V['session'],
     V['date'])
 
@@ -329,6 +337,7 @@ def play_voice(V, voice, dur=4):
             side = -1
         elif V['side'] == 'right':
             side = 1
+
         this_tilt_pos = side * float(V['tilt_position'])
         if this_tilt_pos > 6:
             message = os.path.join(audio_dir, 'rechts_stark.wav')
