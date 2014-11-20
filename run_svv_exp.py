@@ -325,7 +325,6 @@ def draw_lines(lines, trials):
 
         experiment.nextEntry()
 
-
 def play_voice(V, voice, dur=4):
     # TODO: check logic here...
     if V['belief'] == 'upright':
@@ -333,22 +332,18 @@ def play_voice(V, voice, dur=4):
         print("Message: aufrecht")
 
     elif V['belief'] == 'tilted':
-        if V['side'] == 'left':
-            side = -1
-        elif V['side'] == 'right':
-            side = 1
+        this_tilt_pos = float(V['tilt_position'])
 
-        this_tilt_pos = side * float(V['tilt_position'])
-        if this_tilt_pos > 6:
+        if (this_tilt_pos > 6) and (V['side'] == 'right'):
             message = os.path.join(audio_dir, 'rechts_stark.wav')
             print("Message: rechts - stark geneigt")
-        elif (this_tilt_pos > 0) or (this_tilt_pos == 0 and V['side'] == 'left'):
+        elif (this_tilt_pos <= 6) and V['side'] == 'right'):
             message = os.path.join(audio_dir, 'rechts_leicht.wav')
             print("Message: rechts - leicht geneigt")
-        elif this_tilt_pos < -6:
+        elif this_tilt_pos > 6 (V['side'] == 'left'):
             message = os.path.join(audio_dir, 'links_stark.wav')
             print("Message: links - stark geneigt")
-        elif (this_tilt_pos < 0) or (this_tilt_pos == 0 and V['side'] == 'right'):
+        elif (this_tilt_pos <= 6) and V['side'] == 'left'):
             message = os.path.join(audio_dir, 'links_leicht.wav')
             print("Message: links - leicht geneigt")
 
@@ -356,6 +351,37 @@ def play_voice(V, voice, dur=4):
     voice.play()
     win.flip()
     core.wait(dur)
+
+# def play_voice(V, voice, dur=4):
+#     # TODO: check logic here...
+#     if V['belief'] == 'upright':
+#         message = os.path.join(audio_dir, 'aufrecht.wav')
+#         print("Message: aufrecht")
+
+#     elif V['belief'] == 'tilted':
+#         if V['side'] == 'left':
+#             side = -1
+#         elif V['side'] == 'right':
+#             side = 1
+
+#         this_tilt_pos = side * float(V['tilt_position'])
+#         if this_tilt_pos > 6:
+#             message = os.path.join(audio_dir, 'rechts_stark.wav')
+#             print("Message: rechts - stark geneigt")
+#         elif (this_tilt_pos > 0) or (this_tilt_pos == 0 and V['side'] == 'left'):
+#             message = os.path.join(audio_dir, 'rechts_leicht.wav')
+#             print("Message: rechts - leicht geneigt")
+#         elif this_tilt_pos < -6:
+#             message = os.path.join(audio_dir, 'links_stark.wav')
+#             print("Message: links - stark geneigt")
+#         elif (this_tilt_pos < 0) or (this_tilt_pos == 0 and V['side'] == 'right'):
+#             message = os.path.join(audio_dir, 'links_leicht.wav')
+#             print("Message: links - leicht geneigt")
+
+#     voice.setSound(message)
+#     voice.play()
+#     win.flip()
+#     core.wait(dur)
 
 
 def ask_calibrate():
