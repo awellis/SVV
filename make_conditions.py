@@ -32,10 +32,10 @@ filename = 'participants' + os.sep + participant_dir + os.sep + \
                                V['participant_name'], task)
 
 
-positions = [0, -6, 6]
-adaptations = [True, False]
+positions = ['0', 'right_6', 'left_6']
+adaptations = ['yes', 'no']
 beliefs = ['upright', 'tilted']
-durations = [15]
+durations = [1]
 
 conditions =[{'position': position, 'adaptation': adaptation, \
             'belief': belief, 'duration': duration} \
@@ -43,10 +43,10 @@ conditions =[{'position': position, 'adaptation': adaptation, \
             for belief in beliefs for duration in durations]
 
 for cond in conditions:
-    if cond['adaptation']:
-        cond['duration'] = 15
+    if cond['adaptation'] == 'yes':
+        cond['duration'] = 11
     else:
-        cond['duration'] = 10
+        cond['duration'] = 6
 
 from random import shuffle, seed
 
@@ -54,7 +54,7 @@ seed(19834 * int(V['participant_number']))
 shuffle(conditions)
 
 
-column_headers = ['duration', 'position', 'adaptation', 'belief']
+column_headers = ['duration', 'tilt_position', 'adaptation', 'belief']
 with open(filename + '.csv', 'wb') as conditions_file:
         writer = csv.writer(conditions_file, dialect='excel')
         writer.writerow(column_headers)

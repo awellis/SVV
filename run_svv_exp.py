@@ -334,16 +334,16 @@ def play_voice(V, voice, dur=4):
     elif V['belief'] == 'tilted':
         this_tilt_pos = float(V['tilt_position'])
 
-        if (this_tilt_pos > 6) and (V['side'] == 'right'):
+        if (this_tilt_pos > 6) and (V['belief_side'] == 'right'):
             message = os.path.join(audio_dir, 'rechts_stark.wav')
             print("Message: rechts - stark geneigt")
-        elif (this_tilt_pos <= 6) and V['side'] == 'right'):
+        elif (this_tilt_pos <= 6) and (V['belief_side'] == 'right'):
             message = os.path.join(audio_dir, 'rechts_leicht.wav')
             print("Message: rechts - leicht geneigt")
-        elif this_tilt_pos > 6 (V['side'] == 'left'):
+        elif this_tilt_pos > 6 and (V['belief_side'] == 'left'):
             message = os.path.join(audio_dir, 'links_stark.wav')
             print("Message: links - stark geneigt")
-        elif (this_tilt_pos <= 6) and V['side'] == 'left'):
+        elif (this_tilt_pos <= 6) and (V['belief_side'] == 'left'):
             message = os.path.join(audio_dir, 'links_leicht.wav')
             print("Message: links - leicht geneigt")
 
