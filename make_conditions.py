@@ -3,7 +3,9 @@
 # date: 20/11/2014
 
 from __future__ import division
-import csv, os
+import csv
+import os
+from psychopy import gui
 
 task = 'gravity'
 
@@ -15,6 +17,11 @@ V = {'participant_name': 'AE',
      'gender': ['male', 'female'],
      # 'task': ['gravity', 'egocentric'],
      'side': ['left', 'right']}
+
+dlg = gui.DlgFromDict(dictionary=V, title='Create conditions',
+                      order=['participant_number', 'participant_name', 'age',
+                      'hand', 'gender', 'session',
+                      'side'])
 
 """
 Setup output files
@@ -32,7 +39,7 @@ filename = 'participants' + os.sep + participant_dir + os.sep + \
                                V['participant_name'], task)
 
 
-positions = ['0', 'right_6', 'left_6']
+positions = ['0', '6_right', '6_left']
 adaptations = ['yes', 'no']
 beliefs = ['upright', 'tilted']
 durations = [1]
@@ -52,7 +59,6 @@ from random import shuffle, seed
 
 seed(19834 * int(V['participant_number']))
 shuffle(conditions)
-
 
 column_headers = ['duration', 'tilt_position', 'adaptation', 'belief']
 with open(filename + '.csv', 'wb') as conditions_file:
