@@ -224,38 +224,38 @@ def create_stimuli(win, xpos):
                                     depth=-1.0)
 
     noise_left = visual.GratingStim(win=win,
-                               name='noise_left',
-                               # tex=np.random.random((512, 512))*2-1,
-                               tex=make_noise(),
-                               mask='gauss',
-                               ori=0,
-                               pos=[-xpos, 0],
-                               size=NOISE_SIZE,
-                               sf=None,
-                               phase=0.0,
-                               color=[1,1,1],
-                               colorSpace='rgb',
-                               opacity=0.6,
-                               texRes=512,
-                               interpolate=True,
-                               depth=-1.0)
+                                    name='noise_left',
+
+                                    tex=make_noise(),
+                                    mask='gauss',
+                                    ori=0,
+                                    pos=[-xpos, 0],
+                                    size=NOISE_SIZE,
+                                    sf=None,
+                                    phase=0.0,
+                                    color=[1, 1, 1],
+                                    colorSpace='rgb',
+                                    opacity=0.6,
+                                    texRes=512,
+                                    interpolate=True,
+                                    depth=-1.0)
 
     noise_right = visual.GratingStim(win=win,
-                               name='noise_right',
-                               # tex=np.random.random((512, 512))*2-1,
-                               tex=make_noise(),
-                               mask='gauss',
-                               ori=0,
-                               pos=[xpos, 0],
-                               size=NOISE_SIZE,
-                               sf=None,
-                               phase=0.0,
-                               color=[1,1,1],
-                               colorSpace='rgb',
-                               opacity=0.6,
-                               texRes=512,
-                               interpolate=True,
-                               depth=-1.0)
+                                     name='noise_right',
+                                     # tex=np.random.random((512, 512))*2-1,
+                                     tex=make_noise(),
+                                     mask='gauss',
+                                     ori=0,
+                                     pos=[xpos, 0],
+                                     size=NOISE_SIZE,
+                                     sf=None,
+                                     phase=0.0,
+                                     color=[1, 1, 1],
+                                     colorSpace='rgb',
+                                     opacity=0.6,
+                                     texRes=512,
+                                     interpolate=True,
+                                     depth=-1.0)
 
     return(clock, voice, fixation_left, fixation_right, line_left, line_right, noise_left, noise_right)
 
@@ -325,6 +325,7 @@ def draw_lines(lines, trials):
 
         experiment.nextEntry()
 
+
 def play_voice(V, voice, dur=4):
     # TODO: check logic here...
     if V['belief'] == 'upright':
@@ -352,37 +353,6 @@ def play_voice(V, voice, dur=4):
     win.flip()
     core.wait(dur)
 
-# def play_voice(V, voice, dur=4):
-#     # TODO: check logic here...
-#     if V['belief'] == 'upright':
-#         message = os.path.join(audio_dir, 'aufrecht.wav')
-#         print("Message: aufrecht")
-
-#     elif V['belief'] == 'tilted':
-#         if V['side'] == 'left':
-#             side = -1
-#         elif V['side'] == 'right':
-#             side = 1
-
-#         this_tilt_pos = side * float(V['tilt_position'])
-#         if this_tilt_pos > 6:
-#             message = os.path.join(audio_dir, 'rechts_stark.wav')
-#             print("Message: rechts - stark geneigt")
-#         elif (this_tilt_pos > 0) or (this_tilt_pos == 0 and V['side'] == 'left'):
-#             message = os.path.join(audio_dir, 'rechts_leicht.wav')
-#             print("Message: rechts - leicht geneigt")
-#         elif this_tilt_pos < -6:
-#             message = os.path.join(audio_dir, 'links_stark.wav')
-#             print("Message: links - stark geneigt")
-#         elif (this_tilt_pos < 0) or (this_tilt_pos == 0 and V['side'] == 'right'):
-#             message = os.path.join(audio_dir, 'links_leicht.wav')
-#             print("Message: links - leicht geneigt")
-
-#     voice.setSound(message)
-#     voice.play()
-#     win.flip()
-#     core.wait(dur)
-
 
 def ask_calibrate():
     done = False
@@ -405,6 +375,7 @@ def ask_calibrate():
     core.wait(0.5)
     return calibrate
 
+
 def wait_quit():
     print("Press 'q' to end experiment")
     done = False
@@ -418,6 +389,7 @@ def wait_quit():
     event.clearEvents()
     win.flip()
     core.wait(0.5)
+
 
 def deg2rad(deg):
     import math
@@ -524,7 +496,7 @@ if V['Moog'] == 'yes':
     print("Waiting for 15 seconds...")
     countdown = 15*ITI_DURATION
     while countdown >= 0:
-        if countdown%10 == 0:
+        if countdown % 10 == 0:
             print("Countdown: {0}".format(countdown))
         win.flip()
         countdown -= 1
@@ -534,7 +506,6 @@ else:
 
 print("Waiting for adjustment task to start")
 draw_fixation(color='green')
-
 
 
 """
@@ -605,7 +576,7 @@ else:
 
 while frame_n < 5*ITI_DURATION:
     frame_n += 1
-    if frame_n%1 == 0:
+    if frame_n % 1 == 0:
         ori = ori
         [line.setOri(degrees, op) for line in lines]
         [line.draw() for line in lines]
@@ -617,13 +588,11 @@ noise_right.setPos([xpos, 0])
 
 while frame_n < 5*ITI_DURATION:
     frame_n += 1
-    if frame_n%2 == 0:
+    if frame_n % 2 == 0:
         noise_texture = np.random.random((512, 512))*2-1
         [i.setTex(noise_texture) for i in noise]
     [i.draw() for i in noise]
     win.flip()
-
-
 
 
 """
@@ -640,7 +609,7 @@ sequence = list(np.linspace(start=svv-RANGE, stop=svv+RANGE, num=N_ORI))
 
 conditions = {'orientation': sequence}
 trial_list = data.createFactorialTrialList(conditions)
-trials = data.TrialHandler(trialList=trial_list, nReps = N_REPS, method='random')
+trials = data.TrialHandler(trialList=trial_list, nReps=N_REPS, method='random')
 experiment.addLoop(trials)
 
 
@@ -657,8 +626,6 @@ while frame_n < ITI_DURATION:
 
 # start trial
 draw_lines(lines, trials)
-
-
 
 # draw yellow circle to indicate end of trials
 draw_fixation(color='yellow')
