@@ -20,7 +20,7 @@ from sys import platform as _platform
 exp_name = 'svv'
 
 V = {'participant_name': 'AE',
-     'participant_number': 01,
+     'participant_number': '01',
      'session': '01',
      'age': '99',
      'hand': ['right', 'left'],
@@ -101,7 +101,7 @@ if not os.path.isdir('data'):
     os.makedirs('data')
 
 filename = 'data' + os.sep + '{0:s}_{1:s}_{2:s}_{3:s}_{4:s}_{5:s}_{6:s}'.format(
-    str(V['participant_number']), V['participant_name'], V['task'],
+    V['participant_number'], V['participant_name'], V['task'],
     V['tilt_position'], V['belief'], V['session'],
     V['date'])
 
