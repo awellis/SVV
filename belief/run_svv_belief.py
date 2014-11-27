@@ -332,11 +332,11 @@ def play_voice(V, voice, dur=4):
         print("Message: aufrecht")
 
     elif V['belief'] == 'tilted':
-        this_tilt_pos = float(V['tilt_position'])
-        if this_tilt_pos > 0:
+        # this_tilt_pos = float(V['tilt_position'])
+        if V['side'] == "right":
             message = os.path.join(audio_dir, 'rechts_geneigt.wav')
             print("Message: rechts geneigt")
-        elif this_tilt_pos < 0:
+        elif V['side'] == "left":
             message = os.path.join(audio_dir, 'links_geneigt.wav')
             print("Message: links geneigt")
 
