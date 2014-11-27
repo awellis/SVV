@@ -73,7 +73,7 @@ LINE_DURATION = 30
 MOVEMENT_DURATION = 40 # 40 seconds
 
 # stimulus parameters
-XPOS = 500
+XPOS = V['XPOS']
 
 if V['display'] == "oculus":
     OPACITY = 0.1
@@ -498,8 +498,8 @@ else:
 
 # wait for another 10 seconds
 
-print("Waiting for another 10 seconds...")
-core.wait(10)
+print("Waiting for another 5 seconds...")
+core.wait(5)
 
 print("Waiting for adjustment task to start")
 draw_fixation(color='green')
