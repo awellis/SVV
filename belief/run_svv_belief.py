@@ -73,7 +73,7 @@ LINE_DURATION = 30
 MOVEMENT_DURATION = 40 # 40 seconds
 
 # stimulus parameters
-XPOS = V['XPOS']
+XPOS = V['xpos']
 
 if V['display'] == "oculus":
     OPACITY = 0.1
