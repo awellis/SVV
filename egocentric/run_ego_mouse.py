@@ -17,7 +17,7 @@ from sys import platform as _platform
 """
 
 # GUI dialogue
-exp_name = 'svv_ego_adapt'
+exp_name = 'svv_ego'
 
 V = {'participant_name': 'FM',
      'participant_number': '501',
@@ -26,12 +26,15 @@ V = {'participant_name': 'FM',
      'hand': ['right', 'left'],
      'gender': ['male', 'female'],
      'xpos': 480,
-     'tilt_position': ['0', '5'],
-     'side': ['right', 'left'],
+     'tilt_position': ['0', '5', '16'],
      'reps': 30,
-     'adaptation': ['left', 'right'],
-     'task': ['gravity', 'egocentric'],
+     'side': ['left', 'right'],
+     # 'belief_side': ['left', 'right'],
+     # 'adaptation': ['yes', 'no'],
+     # 'belief': ['upright', 'tilted'],
+     'task': ['gravity', 'ego'],
      'estimation_method': ['adjustment'],
+     # 'estimation_method': ['adjustment', 'staircase'],
      'display': ['oculus', 'laptop'],
      'Moog': ['yes', 'no'],
      'n_adjust': 1}
@@ -40,10 +43,8 @@ V = {'participant_name': 'FM',
 dlg = gui.DlgFromDict(dictionary=V, title=exp_name,
                       order=['participant_number', 'participant_name', 'age',
                       'hand', 'gender', 'xpos',
-                      # 'session',
-                      'tilt_position', 'adaptation',
-                      'task', 'side', 'reps', 'Moog', 'display', 'estimation_method',
-                      'n_adjust'])
+                      'side', 'tilt_position',
+                    'task', 'reps', 'Moog', 'display', 'n_adjust'])
 
 if not dlg.OK:
     core.quit()
@@ -69,13 +70,13 @@ N_REPS = int(V['reps'])
 
 ITI_DURATION = 60
 LINE_DURATION = 30
-# MOVEMENT_DURATION = 10 # 40 seconds
+MOVEMENT_DURATION = 40 # 40 seconds
 
 # stimulus parameters
 XPOS = V['xpos']
 
 if V['display'] == "oculus":
-    OPACITY = 0.2
+    OPACITY = 0.1
 else:
     OPACITY = 0.6
 
@@ -101,10 +102,9 @@ if not os.path.isdir('data'):
 
 participant = V['participant_number'] + '_' + V['participant_name']
 
-filename = 'data' + os.sep + participant + os.sep + \
-    '{0:s}_{1:s}_{2:s}_{3:s}_{4:s}_{5:s}_{6:s}_{7:s}'.format(
+filename = 'data' + os.sep + participant + os.sep + '{0:s}_{1:s}_{2:s}_{3:s}_{4:s}_{5:s}_{6:s}'.format(
     V['participant_number'], V['participant_name'], V['exp_name'],
-    V['tilt_position'], V['adaptation'], V['task'], V['side'],
+    V['tilt_position'], V['task'], V['side'],
     V['date'])
 
 
@@ -138,9 +138,10 @@ else:
 win = visual.Window(size=(1200, 800), fullscr=full_screen,
                     units='pix', screen=screen_n,
                     allowGUI=False, allowStencil=False,
-                    monitor='testMonitor', color=[-1, -1, -1],
-                    colorSpace='rgb',
+                    monitor='testMonitor', color=[-1, -1, -1], colorSpace='rgb',
                     blendMode='avg', useFBO=True)
+mouse = event.Mouse()
+
 
 V['frame_rate'] = win.getActualFrameRate()
 if V['frame_rate'] is not None:
@@ -284,7 +285,7 @@ def draw_fixation(color):
 
 
 def draw_lines(lines, trials):
-    print("Starting 2AFC task now...")
+    print("Starting 2AFC task now")
     for trial in trials:
         t = 0
         frame_n = 0
@@ -482,6 +483,7 @@ else:
     print("Running experiment on laptop")
 
 
+
 # if V['Moog'] == 'yes':
 #     print("Waiting for Moog to finish...")
 #     countdown = MOVEMENT_DURATION * ITI_DURATION
@@ -494,9 +496,9 @@ else:
 #     core.wait(0.5)
 
 
-# wait for a few seconds
+# wait for another 10 seconds
 
-print("Waiting for 2 seconds...")
+print("Waiting for another 2 seconds...")
 core.wait(2)
 
 print("Waiting for adjustment task to start")
@@ -518,6 +520,7 @@ elif V['side'] == 'left':
 ori = round(np.random.uniform(tilt-3, tilt+3))
 
 
+
 # start adjustment task
 print("Adjustment task started...")
 done = False
@@ -525,10 +528,11 @@ while not done:
     [line.setOri(ori) for line in lines]
     [line.draw() for line in lines]
 
-    if event.getKeys('f'):
+    mouse1, mouse2, mouse3 = mouse.getPressed()
+    if mouse1:
         ori -= 1
         print('current SVV: {svv}'.format(svv=ori))
-    elif event.getKeys('j'):
+    elif mouse2:
         ori += 1
         print('current SVV: {svv}'.format(svv=ori))
 
