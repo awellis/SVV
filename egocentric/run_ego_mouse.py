@@ -71,7 +71,7 @@ N_REPS = int(V['reps'])
 ITI_DURATION = 60
 LINE_DURATION = 30
 MOVEMENT_DURATION = 40 # 40 seconds
-INCREMENT = 0.25
+INCREMENT = 0.2
 
 # stimulus parameters
 XPOS = V['xpos']
@@ -142,7 +142,7 @@ win = visual.Window(size=(1200, 800), fullscr=full_screen,
                     monitor='testMonitor', color=[-1, -1, -1], colorSpace='rgb',
                     blendMode='avg', useFBO=True)
 mouse = event.Mouse()
-
+mouse.setVisible(0)
 
 V['frame_rate'] = win.getActualFrameRate()
 if V['frame_rate'] is not None:
@@ -526,14 +526,20 @@ ori = round(np.random.uniform(tilt-3, tilt+3))
 print("Adjustment task started...")
 done = False
 while not done:
+    scrolldx, scrolldy = mouse.getWheelRel()
+    # print('scroll: {pos}'.format(pos=(scrolldx, scrolldy)))
+    [line.setOri(scrolldy*3, '+') for line in lines]
 
     mouse1, mouse2, mouse3 = mouse.getPressed()
     if mouse1:
         ori -= INCREMENT
         print('current SVV: {svv}'.format(svv=ori))
+        [line.setOri(INCREMENT, '-') for line in lines]
+
     elif mouse3:
         ori += INCREMENT
         print('current SVV: {svv}'.format(svv=ori))
+        [line.setOri(INCREMENT, '+') for line in lines]
 
     if event.getKeys('escape'):
         core.quit()
@@ -541,12 +547,6 @@ while not done:
     if event.getKeys('space'):
         done = True
 
-    dx, dy = mouse.getWheelRel()
-    print('mousepos: {pos}'.format(pos=(dx, dy)))
-    
-    [line.setOri(dy*5, '+') for line in lines]
-
-    [line.setOri(ori) for line in lines]
     [line.draw() for line in lines]
 
     win.flip()
