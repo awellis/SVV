@@ -71,7 +71,7 @@ N_REPS = int(V['reps'])
 ITI_DURATION = 60
 LINE_DURATION = 30
 MOVEMENT_DURATION = 40 # 40 seconds
-INCREMENT = 0.5
+INCREMENT = 0.25
 
 # stimulus parameters
 XPOS = V['xpos']
@@ -542,6 +542,8 @@ while not done:
         done = True
 
     dx, dy = mouse.getWheelRel()
+    print('mousepos: {pos}'.format(pos=(dx, dy)))
+    
     [line.setOri(dy*5, '+') for line in lines]
 
     [line.setOri(ori) for line in lines]
