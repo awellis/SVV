@@ -71,6 +71,7 @@ N_REPS = int(V['reps'])
 ITI_DURATION = 60
 LINE_DURATION = 30
 MOVEMENT_DURATION = 40 # 40 seconds
+INCREMENT = 0.5
 
 # stimulus parameters
 XPOS = V['xpos']
@@ -525,15 +526,13 @@ ori = round(np.random.uniform(tilt-3, tilt+3))
 print("Adjustment task started...")
 done = False
 while not done:
-    [line.setOri(ori) for line in lines]
-    [line.draw() for line in lines]
 
     mouse1, mouse2, mouse3 = mouse.getPressed()
     if mouse1:
-        ori -= 1
+        ori -= INCREMENT
         print('current SVV: {svv}'.format(svv=ori))
-    elif mouse2:
-        ori += 1
+    elif mouse3:
+        ori += INCREMENT
         print('current SVV: {svv}'.format(svv=ori))
 
     if event.getKeys('escape'):
@@ -541,6 +540,13 @@ while not done:
 
     if event.getKeys('space'):
         done = True
+
+    dx, dy = mouse.getWheelRel()
+    [line.setOri(dy*5, '+') for line in lines]
+
+    [line.setOri(ori) for line in lines]
+    [line.draw() for line in lines]
+
     win.flip()
 
 # TODO: transform ori so that it always lies in interval [-90, 90]
