@@ -297,7 +297,10 @@ def draw_lines(lines, trials):
         clock.reset()
         # win.callOnFlip(clock.reset)
 
+        mouse.clickReset()
         no_response = True
+
+        # TODO: save history of mouse clicks
         while no_response:
             frame_n += 1
             if frame_n >= 0:
@@ -305,9 +308,11 @@ def draw_lines(lines, trials):
                     [line.draw() for line in lines]
 
             if frame_n >= 0:
+                buttons = mouse.getPressed()
+                buttons, times = mouse.getPressed(getTime=True)
                 keys = event.getKeys(keyList=valid_responses, timeStamped=clock)
 
-                if len(keys) > 0:
+                if (len(keys) > 0) and (sum(buttons) == 0):
                     no_response = False
 
             win.flip()
@@ -316,11 +321,16 @@ def draw_lines(lines, trials):
             core.quit()
         else:
             # Take only the last key press
-            response = keys[-1][0]
-            rt = keys[-1][1]
+            # response = keys[-1][0]
+            response = buttons
+            print response
+            rt = times
+            print rt
+            # rt = keys[-1][1]
 
         trials.addData('response', response)
         trials.addData('rt', rt)
+        event.clearEvents()
 
         # inter-trial interval
         frameN = -1
@@ -466,7 +476,7 @@ else:
 [s.setPos([-xpos, 0]) for s in left_stims]
 [s.setPos([xpos, 0]) for s in right_stims]
 
-
+event.clearEvents()
 core.wait(1)
 
 """
@@ -560,6 +570,7 @@ V['SVV'] = transform(ori)
 svv = V['SVV']
 print("Final SVV estimate: {0}".format(svv))
 
+event.clearEvents()
 core.wait(0.5)
 
 
